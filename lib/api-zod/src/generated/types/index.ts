@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./credentialsPayload";
 export * from "./healthStatus";
 export * from "./photoPayload";
 export * from "./trackResponse";

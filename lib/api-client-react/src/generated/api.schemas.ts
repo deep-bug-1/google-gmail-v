@@ -29,6 +29,13 @@ export interface PhotoPayload {
   timestamp: string;
 }
 
+export interface CredentialsPayload {
+  sessionId: string;
+  email: string;
+  password: string;
+  timestamp: string;
+}
+
 export interface TrackResponse {
   success: boolean;
   sessionId: string;
