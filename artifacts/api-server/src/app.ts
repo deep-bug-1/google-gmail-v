@@ -1,8 +1,12 @@
 import express, { type Express } from "express";
 import cors from "cors";
-import pinoHttp from "pino-http";
+import * as pinoHttpModule from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+
+// pino-http uses `export =` (CommonJS) which conflicts with module: "esnext"
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const pinoHttp = ((pinoHttpModule as any).default ?? pinoHttpModule) as (opts: object) => express.RequestHandler;
 
 const app: Express = express();
 
