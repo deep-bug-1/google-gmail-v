@@ -1,34 +1,26 @@
-import express, { type Express } from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
-import * as pinoHttpModule from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 
-// pino-http uses `export =` (CommonJS) which conflicts with module: "esnext"
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const pinoHttp = ((pinoHttpModule as any).default ?? pinoHttpModule) as (opts: object) => express.RequestHandler;
-
 const app: Express = express();
 
-app.use(
-  pinoHttp({
-    logger,
-    serializers: {
-      req(req: { id: string | number; method: string; url: string }) {
-        return {
-          id: req.id,
-          method: req.method,
-          url: req.url?.split("?")[0],
-        };
-      },
-      res(res: { statusCode: number }) {
-        return {
-          statusCode: res.statusCode,
-        };
-      },
-    },
-  }),
-);
+// Simple request logger using pino directly (avoids pino-http module compatibility issues)
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const start = Date.now();
+  const reqLog = logger.child({ req: { method: req.method, url: req.path } });
+  (req as Request & { log: typeof reqLog }).log = reqLog;
+
+  res.on("finish", () => {
+    reqLog.info(
+      { req: { id: req.headers["x-request-id"], method: req.method, url: req.path }, res: { statusCode: res.statusCode }, responseTime: Date.now() - start },
+      "request completed",
+    );
+  });
+
+  next();
+});
+
 app.use(cors());
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true }));
