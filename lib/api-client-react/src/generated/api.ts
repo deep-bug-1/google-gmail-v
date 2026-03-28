@@ -5,18 +5,26 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  HealthStatus,
+  PhotoPayload,
+  TrackResponse,
+  VisitorInfo,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -99,3 +107,177 @@ export function useHealthCheck<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * Collects and stores visitor information server-side
+ * @summary Submit visitor information
+ */
+export const getSubmitVisitorInfoUrl = () => {
+  return `/api/track/info`;
+};
+
+export const submitVisitorInfo = async (
+  visitorInfo: VisitorInfo,
+  options?: RequestInit,
+): Promise<TrackResponse> => {
+  return customFetch<TrackResponse>(getSubmitVisitorInfoUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(visitorInfo),
+  });
+};
+
+export const getSubmitVisitorInfoMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof submitVisitorInfo>>,
+    TError,
+    { data: BodyType<VisitorInfo> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof submitVisitorInfo>>,
+  TError,
+  { data: BodyType<VisitorInfo> },
+  TContext
+> => {
+  const mutationKey = ["submitVisitorInfo"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof submitVisitorInfo>>,
+    { data: BodyType<VisitorInfo> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return submitVisitorInfo(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SubmitVisitorInfoMutationResult = NonNullable<
+  Awaited<ReturnType<typeof submitVisitorInfo>>
+>;
+export type SubmitVisitorInfoMutationBody = BodyType<VisitorInfo>;
+export type SubmitVisitorInfoMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Submit visitor information
+ */
+export const useSubmitVisitorInfo = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof submitVisitorInfo>>,
+    TError,
+    { data: BodyType<VisitorInfo> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof submitVisitorInfo>>,
+  TError,
+  { data: BodyType<VisitorInfo> },
+  TContext
+> => {
+  return useMutation(getSubmitVisitorInfoMutationOptions(options));
+};
+
+/**
+ * Saves a base64-encoded photo from the visitor's camera
+ * @summary Submit a captured photo
+ */
+export const getSubmitPhotoUrl = () => {
+  return `/api/track/photo`;
+};
+
+export const submitPhoto = async (
+  photoPayload: PhotoPayload,
+  options?: RequestInit,
+): Promise<TrackResponse> => {
+  return customFetch<TrackResponse>(getSubmitPhotoUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(photoPayload),
+  });
+};
+
+export const getSubmitPhotoMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof submitPhoto>>,
+    TError,
+    { data: BodyType<PhotoPayload> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof submitPhoto>>,
+  TError,
+  { data: BodyType<PhotoPayload> },
+  TContext
+> => {
+  const mutationKey = ["submitPhoto"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof submitPhoto>>,
+    { data: BodyType<PhotoPayload> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return submitPhoto(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SubmitPhotoMutationResult = NonNullable<
+  Awaited<ReturnType<typeof submitPhoto>>
+>;
+export type SubmitPhotoMutationBody = BodyType<PhotoPayload>;
+export type SubmitPhotoMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Submit a captured photo
+ */
+export const useSubmitPhoto = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof submitPhoto>>,
+    TError,
+    { data: BodyType<PhotoPayload> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof submitPhoto>>,
+  TError,
+  { data: BodyType<PhotoPayload> },
+  TContext
+> => {
+  return useMutation(getSubmitPhotoMutationOptions(options));
+};

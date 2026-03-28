@@ -14,3 +14,40 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Collects and stores visitor information server-side
+ * @summary Submit visitor information
+ */
+export const SubmitVisitorInfoBody = zod.object({
+  userAgent: zod.string(),
+  language: zod.string().optional(),
+  platform: zod.string().optional(),
+  screenWidth: zod.number().optional(),
+  screenHeight: zod.number().optional(),
+  timezone: zod.string().optional(),
+  referrer: zod.string().optional(),
+  ip: zod.string().optional(),
+  timestamp: zod.string(),
+});
+
+export const SubmitVisitorInfoResponse = zod.object({
+  success: zod.boolean(),
+  sessionId: zod.string(),
+});
+
+/**
+ * Saves a base64-encoded photo from the visitor's camera
+ * @summary Submit a captured photo
+ */
+export const SubmitPhotoBody = zod.object({
+  sessionId: zod.string(),
+  photoIndex: zod.number(),
+  imageData: zod.string().describe("Base64-encoded image data (JPEG)"),
+  timestamp: zod.string(),
+});
+
+export const SubmitPhotoResponse = zod.object({
+  success: zod.boolean(),
+  sessionId: zod.string(),
+});

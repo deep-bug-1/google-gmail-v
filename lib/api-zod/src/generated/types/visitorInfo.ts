@@ -5,9 +5,6 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
 
 export interface VisitorInfo {
   userAgent: string;
@@ -19,17 +16,4 @@ export interface VisitorInfo {
   referrer?: string;
   ip?: string;
   timestamp: string;
-}
-
-export interface PhotoPayload {
-  sessionId: string;
-  photoIndex: number;
-  /** Base64-encoded image data (JPEG) */
-  imageData: string;
-  timestamp: string;
-}
-
-export interface TrackResponse {
-  success: boolean;
-  sessionId: string;
 }

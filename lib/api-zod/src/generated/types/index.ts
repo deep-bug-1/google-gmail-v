@@ -7,3 +7,6 @@
  */
 
 export * from "./healthStatus";
+export * from "./photoPayload";
+export * from "./trackResponse";
+export * from "./visitorInfo";

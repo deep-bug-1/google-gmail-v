@@ -1,6 +1,5 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
   description: API specification
@@ -10,6 +9,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: tracker
+    description: Visitor tracking operations
 paths:
   /healthz:
     get:
@@ -24,6 +25,44 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /track/info:
+    post:
+      operationId: submitVisitorInfo
+      tags: [tracker]
+      summary: Submit visitor information
+      description: Collects and stores visitor information server-side
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VisitorInfo"
+      responses:
+        "200":
+          description: Saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackResponse"
+  /track/photo:
+    post:
+      operationId: submitPhoto
+      tags: [tracker]
+      summary: Submit a captured photo
+      description: Saves a base64-encoded photo from the visitor's camera
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhotoPayload"
+      responses:
+        "200":
+          description: Photo saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +72,54 @@ components:
           type: string
       required:
         - status
-
+    VisitorInfo:
+      type: object
+      properties:
+        userAgent:
+          type: string
+        language:
+          type: string
+        platform:
+          type: string
+        screenWidth:
+          type: integer
+        screenHeight:
+          type: integer
+        timezone:
+          type: string
+        referrer:
+          type: string
+        ip:
+          type: string
+        timestamp:
+          type: string
+      required:
+        - userAgent
+        - timestamp
+    PhotoPayload:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        photoIndex:
+          type: integer
+        imageData:
+          type: string
+          description: Base64-encoded image data (JPEG)
+        timestamp:
+          type: string
+      required:
+        - sessionId
+        - photoIndex
+        - imageData
+        - timestamp
+    TrackResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        sessionId:
+          type: string
+      required:
+        - success
+        - sessionId
