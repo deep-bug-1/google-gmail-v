@@ -584,3 +584,22 @@ body {
     align-items: flex-start;
   }
 }
+
+/* RTL label fix */
+.gl-label-rtl {
+  left: auto;
+  right: 16px;
+}
+
+.gl-input-rtl:focus + .gl-label-rtl,
+.gl-input-rtl:not(:placeholder-shown) + .gl-label-rtl {
+  right: 12px;
+  top: 8px;
+  font-size: 12px;
+  color: #1a73e8;
+  transform: none;
+}
+
+.gl-input-rtl.gl-input-error + .gl-label-rtl {
+  color: #d93025;
+}
